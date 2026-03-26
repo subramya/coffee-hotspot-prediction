@@ -1,0 +1,24 @@
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Large/raw data files (keep folder structure, ignore contents)
+data/*.csv
+
+# Model outputs and generated artifacts
+outputs/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+
+# Notebook checkpoints
+.ipynb_checkpoints/

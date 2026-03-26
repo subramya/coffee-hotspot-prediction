@@ -4,8 +4,8 @@ Fill in this document at the start of the project and keep it up to date.
 
 ## 1) Project Overview
 
-- **Title**:
-- **Team**:
+- **Learning Coffee-Driven Subway Hotspots in Manhattan**:
+- **Ramya Subramanian, Sachi Patel, Hailey Gamer**:
 - **Problem statement** (1-3 sentences):
 - **Hypothesis** (what you expect to happen and why):
 
@@ -22,9 +22,11 @@ Fill in this document at the start of the project and keep it up to date.
 
 ## 4) Baseline
 
-- **Baseline model** (name + key params):
+- **Baseline model** LSTM Model:
 - **Baseline metrics**:
 - **Why this is a fair baseline**:
+
+LSTM Model 0: Our baseline LSTM using only historical ridership failed to meaningfully separate hotspot and non-hotspot cases. Predicted probabilities clustered tightly around 0.48, indicating low confidence and weak signal. As a result, model predictions were highly sensitive to the classification threshold, flipping between predicting all non-hotspots and all hotspots. This motivated the inclusion of additional contextual features such as café density.
 
 ## 5) Proposed Method
 
