@@ -1,5 +1,0 @@
-loader
-models
-multi_modal
-trainer
-utils
