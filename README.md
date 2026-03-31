@@ -1,48 +1,44 @@
-# ML Class Project Template
+# Morning Brews & Morning Rush: Coffee-Driven Subway Hotspots in Manhattan
 
-This repo is set up as a class project template derived from a research project codebase. It keeps a realistic structure (data, scripts, configs, training code) while adding guidance for scoping, experimentation, and reporting.
+STAT W3106 – Spring 2026 | Ramya Subramanian, Sachi Patel, Hailey Gamer
 
-If you want to refer to the `README` in the original codebase, see `docs/README_NEDS.md`.
+## Overview
 
-## Fork This Repo
+We model 7–10am Manhattan subway "hotspots" (top 25% of morning ridership by station-day) as a spatio-temporal prediction problem, benchmarking LSTM baselines against a full Spatio-Temporal Graph Attention Network (GAT) + GRU.
 
-1. Click the **Fork** button on GitHub to create your own copy.
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/ml-class-project-template.git
-   cd ml-class-project-template
-   ```
-3. Rename the repo on GitHub to match your project.
+## Data Setup
 
-## Quick Start
+Data is stored locally and not tracked by git. Generate both files before running models.
 
-1. Read the project brief and fill in your scope: `docs/PROJECT_TEMPLATE.md`.
-2. Set up the environment. **Replace the environment name and Python package dependencies with your own.**
-   ```bash
-   conda env create -f env.yaml
-   conda activate YOUR_ENV_NAME
-   ```
+**Subway ridership** (`data/subway_data.csv`): Run `script/data cleanup/subway_data_cleanup.py`. Pulls ~2M rows from the MTA Hourly Ridership API, filters to Manhattan 7–10am, and produces ~9,400 station-day rows across 95 dates and 123 stations.
 
-## Recommended Repo Layout
+**Café density** (`data/manhattan_cafes.csv`): Download the NYC Restaurant Inspection Results CSV (dated 20260325) from [NYC Open Data](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j), place it in `script/data cleanup/`, then run `restaurant_data_cleanup.py`. Produces 2,457 Manhattan café/bakery locations.
 
-Use the existing folder structure, but **replace it with your own files**:
+## Environment
+```bash
+conda create -n neds python=3.10 pandas numpy matplotlib scikit-learn scipy
+conda activate neds
+pip install torch torchvision seaborn
+pip install "numpy<2.0" --force-reinstall
+```
 
-- `src/`: core model, training, evaluation, and utilities.
-- `script/`: run scripts that record exact command-line commands when running on a cluster.
-- `data/`: small metadata files or pointers to datasets.
-- `assets/`: figures for the final report.
-- `docs/`: project brief, milestones, and writeups.
+Note: `env.yaml` uses CUDA packages incompatible with Apple Silicon — use the above instead.
 
-## What Students Must Deliver
+## Running the Models
+```bash
+conda activate neds
+cd script/lstm\ models/
+python lstm_model0.py
+python lstm_model1.py
+```
 
-- A clearly scoped research question and hypothesis.
-- A model implementation, with corresponding training and evaluation code.
-- A reproducible experiment log with metrics and plots.
-- **A final project report hosted using GitHub Pages** (see `docs/README_NEDS.md` for an example of the hosted project page.)
+Outputs saved to `outputs/model0_outputs/` and `outputs/model1_outputs/`.
 
-## Instructor Notes
+## Baseline Results
 
-- The training/eval scripts in the original codebase are intact for your reference.
-- Suggested workflows are outlined in `docs/PROJECT_TEMPLATE.md`.
+| Model | Features | F1 | AUC |
+|-------|----------|----|-----|
+| Model 0 | Ridership only (3-day sequence) | 0.48 | 0.71 |
+| Model 1 | Ridership + café density (7-day sequence) | 0.59 | 0.79 |
 
-
+Adding café density as a static station-level feature improved every metric, confirming that third-place density adds predictive signal beyond ridership history alone. Both models treat stations independently but the GAT addresses this by learning spatial spillover across the station graph.
