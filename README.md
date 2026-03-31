@@ -14,6 +14,10 @@ Data is stored locally and not tracked by git. Generate both files before runnin
 
 **Café density** (`data/manhattan_cafes.csv`): Download the NYC Restaurant Inspection Results CSV (dated 20260325) from [NYC Open Data](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j), place it in `script/data cleanup/`, then run `restaurant_data_cleanup.py`. Produces 2,457 Manhattan café/bakery locations.
 
+## Blog Post
+
+See `docs/blog.md` for our technical blog post, including the background section covering why modeling coffee-driven subway hotspots matters and a review of prior work in spatio-temporal graph learning and urban mobility prediction.
+
 ## Environment
 ```bash
 conda create -n neds python=3.10 pandas numpy matplotlib scikit-learn scipy
