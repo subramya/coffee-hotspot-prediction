@@ -49,7 +49,7 @@ def set_seed(seed=42):
         torch.cuda.manual_seed_all(seed)
 
 class LSTMClassifier(nn.Module):
-    def __init__(self, input_size=2, hidden_size=32, num_layers=1):
+    def __init__(self, input_size=2, hidden_size=32, num_layers=1, static_size=1):
         super().__init__()
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -57,13 +57,13 @@ class LSTMClassifier(nn.Module):
             num_layers=num_layers,
             batch_first=True
         )
-        self.fc = nn.Linear(hidden_size, 1)
+        self.fc = nn.Linear(hidden_size + static_size, 1)
 
-    def forward(self, x):
-        out, _ = self.lstm(x)
+    def forward(self, x_seq, x_static):
+        out, _ = self.lstm(x_seq)
         out = out[:, -1, :]
-        out = self.fc(out)
-        return out.squeeze(1)
+        out = torch.cat([out, x_static], dim=1)
+        return self.fc(out).squeeze(1)
 
 def load_subway_data():
     df = pd.read_csv(SUBWAY_FILE, low_memory=False)
@@ -146,7 +146,7 @@ def scale_features(df, cutoff_date):
     return df
 
 def build_sequences(df, sequence_length=7):
-    X, y, meta = [], [], []
+    X_seq, X_stat, y, meta = [], [], [], []
 
     for station_id, group in df.groupby("station_complex_id"):
         group = group.sort_values("date").reset_index(drop=True)
@@ -154,62 +154,72 @@ def build_sequences(df, sequence_length=7):
         if len(group) <= sequence_length:
             continue
 
-        feature_array = group[["morning_ridership_scaled", "cafe_density_scaled"]].to_numpy(dtype=np.float32)
+        ridership_array = group[["morning_ridership_scaled"]].to_numpy(dtype=np.float32)
         target_array = group["hotspot"].to_numpy(dtype=np.float32)
+        cafe_density = np.float32(group["cafe_density_scaled"].iloc[0])
 
         for i in range(sequence_length, len(group)):
-            seq = feature_array[i-sequence_length:i]
-            target = target_array[i]
-
-            X.append(seq)
-            y.append(target)
+            X_seq.append(ridership_array[i - sequence_length:i])
+            X_stat.append([cafe_density])
+            y.append(target_array[i])
             meta.append({
                 "station_complex_id": station_id,
                 "station_complex": group.loc[i, "station_complex"],
                 "date": group.loc[i, "date"],
             })
 
-    X = np.array(X, dtype=np.float32)
+    X_seq  = np.array(X_seq,  dtype=np.float32)
+    X_stat = np.array(X_stat, dtype=np.float32)
     y = np.array(y, dtype=np.float32)
     meta = pd.DataFrame(meta)
 
-    return X, y, meta
+    return X_seq, X_stat, y, meta
 
-def split_by_time(X, y, meta, cutoff_date):
+def split_by_time(X_seq, X_stat, y, meta, cutoff_date):
     mask_train = pd.to_datetime(meta["date"]) < cutoff_date
-    mask_test = ~mask_train
+    mask_test  = ~mask_train
 
-    X_train = X[mask_train]
-    X_test = X[mask_test]
-    y_train = y[mask_train]
-    y_test = y[mask_test]
-    meta_train = meta.loc[mask_train].reset_index(drop=True)
-    meta_test = meta.loc[mask_test].reset_index(drop=True)
+    return (
+        X_seq[mask_train],  X_seq[mask_test],
+        X_stat[mask_train], X_stat[mask_test],
+        y[mask_train],      y[mask_test],
+        meta.loc[mask_train].reset_index(drop=True),
+        meta.loc[mask_test].reset_index(drop=True),
+    )
 
-    return X_train, X_test, y_train, y_test, meta_train, meta_test
-
-def train_model(X_train, y_train, X_test, y_test):
+def train_model(X_seq_train, X_stat_train, y_train, X_seq_test, X_stat_test, y_test):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_ds = TensorDataset(
-        torch.tensor(X_train, dtype=torch.float32),
-        torch.tensor(y_train, dtype=torch.float32)
+        torch.tensor(X_seq_train,  dtype=torch.float32),
+        torch.tensor(X_stat_train, dtype=torch.float32),
+        torch.tensor(y_train,      dtype=torch.float32),
     )
     test_ds = TensorDataset(
-        torch.tensor(X_test, dtype=torch.float32),
-        torch.tensor(y_test, dtype=torch.float32)
+        torch.tensor(X_seq_test,  dtype=torch.float32),
+        torch.tensor(X_stat_test, dtype=torch.float32),
+        torch.tensor(y_test,      dtype=torch.float32),
     )
 
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
     model = LSTMClassifier(
-        input_size=X_train.shape[2],
+        input_size=X_seq_train.shape[2],
         hidden_size=HIDDEN_SIZE,
-        num_layers=NUM_LAYERS
+        num_layers=NUM_LAYERS,
+        static_size=X_stat_train.shape[1],
     ).to(device)
 
-    criterion = nn.BCEWithLogitsLoss()
+    positive_count = np.sum(y_train == 1)
+    negative_count = np.sum(y_train == 0)
+    if positive_count > 0 and negative_count > 0:
+        pos_weight = torch.tensor(
+            [negative_count / positive_count], dtype=torch.float32
+        ).to(device)
+        criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    else:
+        criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     train_losses = []
@@ -218,17 +228,18 @@ def train_model(X_train, y_train, X_test, y_test):
         model.train()
         total_loss = 0.0
 
-        for xb, yb in train_loader:
-            xb = xb.to(device)
-            yb = yb.to(device)
+        for xb_seq, xb_stat, yb in train_loader:
+            xb_seq  = xb_seq.to(device)
+            xb_stat = xb_stat.to(device)
+            yb      = yb.to(device)
 
             optimizer.zero_grad()
-            logits = model(xb)
+            logits = model(xb_seq, xb_stat)
             loss = criterion(logits, yb)
             loss.backward()
             optimizer.step()
 
-            total_loss += loss.item() * xb.size(0)
+            total_loss += loss.item() * xb_seq.size(0)
 
         epoch_loss = total_loss / len(train_loader.dataset)
         train_losses.append(epoch_loss)
@@ -240,9 +251,10 @@ def train_model(X_train, y_train, X_test, y_test):
     all_true = []
 
     with torch.no_grad():
-        for xb, yb in test_loader:
-            xb = xb.to(device)
-            logits = model(xb)
+        for xb_seq, xb_stat, yb in test_loader:
+            xb_seq  = xb_seq.to(device)
+            xb_stat = xb_stat.to(device)
+            logits  = model(xb_seq, xb_stat)
             probs = torch.sigmoid(logits).cpu().numpy()
             preds = (probs >= 0.5).astype(int)
 
@@ -264,14 +276,15 @@ def train_model(X_train, y_train, X_test, y_test):
 
     return model, train_losses, all_true, all_preds, all_probs, metrics
 
-def plot_example_sequence(X, y):
-    ridership_seq = X[0, :, 0]
-    cafe_seq = X[0, :, 1]
+def plot_example_sequence(X_seq, X_stat, y):
+    ridership_seq = X_seq[0, :, 0]
+    cafe_val = X_stat[0, 0]
     target = int(y[0])
 
     plt.figure(figsize=(8, 4))
     plt.plot(range(1, len(ridership_seq) + 1), ridership_seq, marker="o", label="Ridership")
-    plt.plot(range(1, len(cafe_seq) + 1), cafe_seq, marker="s", label="Cafe density")
+    plt.axhline(cafe_val, linestyle="--", color="tab:orange",
+            label=f"Café density (static) = {cafe_val:.2f}")
     plt.xlabel("Day in input sequence")
     plt.ylabel("Scaled feature value")
     plt.title(f"Model 1 Example Sequence | Next-day hotspot = {target}")
@@ -401,14 +414,21 @@ def main():
     cutoff_date = get_cutoff_date(merged_df, TRAIN_FRAC)
     merged_df = scale_features(merged_df, cutoff_date)
 
-    X, y, meta = build_sequences(merged_df, SEQUENCE_LENGTH)
-    X_train, X_test, y_train, y_test, meta_train, meta_test = split_by_time(X, y, meta, cutoff_date)
-
+    X_seq, X_stat, y, meta = build_sequences(merged_df, SEQUENCE_LENGTH)
+ 
+    (X_seq_train, X_seq_test,
+     X_stat_train, X_stat_test,
+     y_train, y_test,
+     meta_train, meta_test) = split_by_time(X_seq, X_stat, y, meta, cutoff_date)
+ 
     print("Cutoff date:", cutoff_date.date())
-    print("Train shapes:", X_train.shape, y_train.shape)
-    print("Test shapes:", X_test.shape, y_test.shape)
-
-    model, train_losses, y_true, y_pred, y_prob, metrics = train_model(X_train, y_train, X_test, y_test)
+    print("Train shapes — seq:", X_seq_train.shape, "| static:", X_stat_train.shape, "| y:", y_train.shape)
+    print("Test shapes  — seq:", X_seq_test.shape,  "| static:", X_stat_test.shape,  "| y:", y_test.shape)
+ 
+    model, train_losses, y_true, y_pred, y_prob, metrics = train_model(
+        X_seq_train, X_stat_train, y_train,
+        X_seq_test,  X_stat_test,  y_test,
+    )
 
     print("\nModel 1 Metrics")
     for k, v in metrics.items():
@@ -423,7 +443,7 @@ def main():
     pred_df["predicted_probability"] = y_prob
     pred_df.to_csv(os.path.join(OUTPUT_DIR, "model1_test_predictions.csv"), index=False)
 
-    plot_example_sequence(X_train, y_train)
+    plot_example_sequence(X_seq_train, X_stat_train, y_train)
     plot_training_loss(train_losses)
     plot_conf_matrix(y_true, y_pred)
     plot_roc(y_true, y_prob)

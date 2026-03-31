@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader, TensorDataset
 warnings.filterwarnings("ignore")
 
 SUBWAY_FILE = "../../data/subway_data.csv"
-OUTPUT_DIR = "../../data/model0_outputs"
+OUTPUT_DIR = "../../outputs/model0_outputs"
 
 SEQUENCE_LENGTH = 3
 TRAIN_FRAC = 0.80

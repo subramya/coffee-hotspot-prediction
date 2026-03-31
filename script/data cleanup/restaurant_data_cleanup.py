@@ -1,6 +1,6 @@
 import pandas as pd
 
-INPUT_FILE = "../../data/DOHMH_New_York_City_Restaurant_Inspection_Results_20260325.csv"
+INPUT_FILE = "../../data/DOHMH_New_York_City_Restaurant_Inspection_Results_20260330.csv"
 OUTPUT_FILE = "../../data/manhattan_cafes.csv"
 
 
