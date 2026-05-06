@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Morning Brews & Morning Rush</title>
+<title>Morning Brews &amp; Morning Rush</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -236,18 +236,6 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 strong { font-weight: 600; }
 em { font-style: italic; }
 
-/* ── TODO ── */
-.todo {
-  background: var(--surface-alt);
-  border: 1px dashed var(--border);
-  padding: 14px 18px;
-  margin: 20px 0;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-.todo::before { content: "✏  TODO — "; font-weight: 600; color: var(--text-light); }
-
 /* ── Pull quote ── */
 blockquote.pull {
   margin: 32px 0;
@@ -261,19 +249,6 @@ blockquote.pull {
 
 /* ── Figures ── */
 figure { margin: 32px 0; }
-.fig-placeholder {
-  background: var(--surface-alt);
-  border: 1px dashed var(--border);
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  text-align: center;
-  color: var(--text-light);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
 figure img { width: 100%; display: block; border: 1px solid var(--border); }
 figcaption {
   font-size: 0.75rem;
@@ -306,7 +281,6 @@ td {
 tr:hover td { background: var(--surface-alt); }
 .num { text-align: right; font-family: var(--ff-mono); }
 .better { color: var(--accent); font-weight: 600; }
-.pending { color: var(--text-light); font-style: italic; }
 
 /* ── Math ── */
 .math-block {
@@ -433,7 +407,7 @@ footer a:hover { color: var(--accent); }
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <span class="issue-tag">STAT W3106 · Spring 2026</span>
+    <span class="issue-tag">STAT W3106 &middot; Spring 2026</span>
     <h2>Morning Brews<br>&amp; Morning Rush</h2>
   </div>
   <div class="sidebar-authors">
@@ -472,168 +446,241 @@ footer a:hover { color: var(--accent); }
   <div class="hero">
     <div class="hero-eyebrow">Applied Machine Learning</div>
     <h1>Morning Brews<br>&amp; <em>Morning Rush</em></h1>
-    <p class="hero-sub">Learning coffee-driven subway hotspots in Manhattan</p>
+    <p class="hero-sub">Can caf&eacute; density around a subway station predict where morning crowds concentrate?</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Course</span><span class="val">STAT W3106, Barnard/Columbia</span></div>
+      <div class="hero-meta-item"><span class="label">Data range</span><span class="val">Jan&ndash;Apr 2026, 112 days</span></div>
+      <div class="hero-meta-item"><span class="label">Code</span><span class="val"><a href="https://github.com/subramya/coffee-hotspot-prediction" target="_blank">GitHub &nearr;</a></span></div>
+    </div>
   </div>
 
   <!-- 00 -->
   <section id="abstract">
     <h2 class="section-title"><span class="sec-num">00</span>Abstract</h2>
-    <p>We investigate morning subway &ldquo;hotspots&rdquo; in Manhattan by modeling 7&ndash;10am station-level ridership surges as a spatio-temporal representation learning problem. Restricting our analysis to Manhattan subway stations, we construct a spatial graph where nodes represent stations and edges encode geographic proximity and shared line connectivity.</p>
-    <p>We train a Spatio-Temporal Graph Attention Network (GAT) combined with a Gated Recurrent Unit (GRU) to learn latent station embeddings that capture morning demand dynamics. The model uses a multi-branch neural architecture to separately encode (1)&nbsp;historical ridership patterns, (2)&nbsp;station-level caf&eacute; and third-place density, (3)&nbsp;weather variables, and (4)&nbsp;daily urban context embeddings generated from Manhattan news headlines via Sentence-BERT.</p>
-    <p>We introduce a <strong>Coffee Contribution Index</strong> (CCI) computed through structured feature perturbation and branch-level attribution to quantify how strongly third-place density drives hotspot formation across neighborhoods. We benchmark against a sequence-only LSTM that excludes graph structure, isolating the added value of spatial message passing.</p>
+    <p>We investigate morning subway hotspots in Manhattan by framing 7&ndash;10am ridership surges as a node-level binary classification problem on a spatial graph. A station-day is labeled a hotspot if its morning ridership falls in the top 25% across all observations, corresponding to a threshold of 3,258 riders. Restricting our analysis to 123 Manhattan subway stations, we construct a proximity-and-line graph where edges encode geographic distance and shared route connectivity.</p>
+    <p>We train a Simplified Graph Attention Network (ST-GAT) with three feature branches: historical ridership sequences (7-day window), static caf&eacute; density within a 400-meter station radius, and daily weather (temperature, precipitation). After two GATConv layers with a residual skip connection, a classification head outputs per-station hotspot probabilities. The model achieves <strong>F1&nbsp;=&nbsp;0.91</strong> and <strong>AUC&nbsp;=&nbsp;0.99</strong> on the held-out test set, substantially outperforming LSTM baselines (F1 0.48&ndash;0.59).</p>
+    <p>We introduce the <strong>Coffee Contribution Index</strong> (CCI), a zero-ablation attribution measure that quantifies how much the caf&eacute; branch shifts each station&rsquo;s hotspot probability when removed. The CCI reveals a coherent geographic pattern: Midtown and lower Manhattan stations carry positive CCI, while low-caf&eacute; uptown stations show negative CCI, indicating the model uses caf&eacute; density as a proxy for neighborhood commercial character beyond what ridership history captures.</p>
     <figure>
-      <div class="fig-placeholder">Figure 1 &mdash; Teaser map<br><br>Manhattan stations colored by hotspot frequency, caf&eacute; density contours overlaid.<br>Replace with: &lt;img src="assets/fig1_teaser.png" alt="..."&gt;</div>
-      <figcaption><strong>Fig. 1</strong> &mdash; Morning hotspot frequency across 123 Manhattan subway stations (7&ndash;10am, 95 days). Caf&eacute; density contours (400m radius) overlaid. Visual overlap motivates the core hypothesis.</figcaption>
+      <img src="../assets/fig1.png" alt="Manhattan subway stations colored by morning hotspot frequency. Warmer colors indicate higher hotspot frequency. Top stations labeled: Times Square, Grand Central, Penn Station, Herald Square."/>
+      <figcaption><strong>Fig. 1</strong> &mdash; Morning hotspot frequency across 123 Manhattan subway stations (7&ndash;10am, 112 days). Stations colored by fraction of days on which they exceeded the top-25% ridership threshold. The five highest-frequency stations are labeled; all are Midtown transfer hubs.</figcaption>
     </figure>
   </section>
 
   <!-- 01 -->
   <section id="intro">
     <h2 class="section-title"><span class="sec-num">01</span>Introduction</h2>
-    <div class="todo">Write your introduction here (~300 words). Open with the sensory reality of rush hour &mdash; packed platforms, the smell of coffee, the 8:47 local &mdash; then pivot to the research gap. End with a one-sentence summary of what you found. Aim for The Economist, not a textbook.</div>
+    <p>On a January morning in Manhattan, the platforms at Times Square&ndash;42nd Street fill before 8:30am. Thousands of people converge from four directions at once&mdash;off the N, Q, R from Queens, off the 1, 2, 3 from the Upper West Side, out of the shuttle from Grand Central&mdash;and the platform holds about half of them comfortably. The rest wait on the stairs. The train runs every four minutes; the crowd arrives anyway, in pulses that neither the schedule nor the countdown clock fully explains.</p>
+    <p>Transit planners have long known that morning ridership concentrates at certain stations far more than the network map would suggest. But predicting <em>which</em> stations will cross the line from busy into genuinely congested&mdash;and doing so a day ahead rather than four minutes before it happens&mdash;requires a model of behavior. It requires understanding why people go where they go in the early morning, and what in the urban fabric pulls them there.</p>
+    <p>The question this paper poses is deliberately indirect: can the density of coffee shops around a subway station predict whether it becomes a morning hotspot? The bet is not that coffee causes commuting. It is that caf&eacute; density is a reliable proxy for something real&mdash;the commercial texture of a neighborhood, the places where morning routines anchor, the blocks that draw foot traffic before 9am for reasons that are not purely transit-driven. A station surrounded by thirty caf&eacute;s within 400 meters looks and behaves differently from one with two, even if their scheduled service is identical.</p>
+    <p>We test this using a Spatio-Temporal Graph Attention Network trained on 112 days of MTA turnstile data across 123 Manhattan stations. The model encodes three input streams&mdash;ridership history, caf&eacute; density, and daily weather&mdash;and propagates information between stations through a geographic proximity and shared-line graph. We then introduce the Coffee Contribution Index (CCI), which quantifies, station by station, how much the caf&eacute; branch shifts the predicted hotspot probability when removed entirely.</p>
+    <p>The answer is not subtle. The ST-GAT achieves F1 = 0.91 and AUC = 0.99, against LSTM baselines of F1 = 0.48 and 0.59. The CCI shows a geographic split: downtown and Midtown stations carry positive CCI (caf&eacute; density boosts their predicted hotspot probability), while uptown low-caf&eacute; stations show negative CCI (low caf&eacute; count suppresses the prediction). Coffee does not cause rush hour, but it marks the neighborhoods where rush hour runs deepest.</p>
   </section>
 
   <!-- 02 -->
   <section id="background">
     <h2 class="section-title"><span class="sec-num">02</span>Background</h2>
     <h3 class="subsec">Why This Problem Matters</h3>
-    <p>Morning rush hour is the single most stressful period for transit systems. Identifying where surges will concentrate&mdash;not just that they will happen&mdash;gives city planners and the MTA actionable intelligence for deploying staff, adjusting service frequency, or redesigning platform flow before congestion becomes a safety issue.</p>
+    <p>Morning rush hour is the single most stressful period for any urban transit system. Identifying where surges will concentrate&mdash;not just that they will happen&mdash;gives city planners and the MTA actionable intelligence for deploying platform staff, adjusting service frequency, or redesigning flow before congestion becomes a safety issue. Current practice relies heavily on historical averages and human dispatcher judgment. A model that predicts station-level hotspot status 24 hours in advance opens the door to proactive rather than reactive operations.</p>
     <h3 class="subsec">The Third-Place Hypothesis</h3>
-    <p>The inclusion of caf&eacute; and third-place density is the intellectually interesting bet in this research. The implicit hypothesis is that subway hotspots are not purely commuter-driven; they are also shaped by <em>where people choose to linger before work</em>. If the Coffee Contribution Index confirms this, it reframes hotspots as a behavioral and urban design phenomenon rather than just a transit scheduling problem&mdash;with real implications for how cities zone commercial activity near transit and how businesses choose locations.</p>
+    <p>The sociologist Ray Oldenburg introduced the concept of the &ldquo;third place&rdquo; in 1989: the informal gathering space, distinct from home and workplace, that anchors daily social life. Coffee shops are the canonical third place in contemporary urban settings. They concentrate foot traffic at predictable times, anchor morning routines, and cluster in neighborhoods with specific economic characters. Our hypothesis is that caf&eacute; density encodes information about a station&rsquo;s neighborhood that ridership history alone does not fully capture&mdash;commercial activity levels, the mix of office workers and residents, the presence of pre-work gathering culture&mdash;and that this information improves hotspot prediction.</p>
+    <p>If the Coffee Contribution Index confirms this, it reframes hotspots as a behavioral and urban design phenomenon, not just a transit scheduling problem. The implication is real: cities that zone commercial activity around transit nodes may inadvertently concentrate morning demand in ways that strain platform capacity.</p>
     <h3 class="subsec">Methodological Value</h3>
-    <p>Most ridership forecasting treats stations as independent time series. Building a spatial graph that encodes proximity and shared line connectivity lets the model propagate information between stations: a surge at 72nd St likely signals what is coming at 59th St. This mirrors how congestion actually moves through a network, making predictions structurally more honest.</p>
-    <p>The multi-branch architecture with structured feature perturbation is designed to answer <em>why</em> a hotspot forms, not just <em>whether</em> it will&mdash;a harder and more valuable question, since policymakers need causal levers, not just forecasts.</p>
-    <blockquote class="pull">"The core reason this problem matters is that it connects transit operations, urban behavioral economics, and causal machine learning in a way that could directly inform how dense cities manage their most congested daily moments."</blockquote>
+    <p>Most ridership forecasting treats stations as independent time series. A spatial graph that encodes proximity and shared-line connectivity lets the model propagate information between stations: a surge developing at 72nd St is correlated with what is about to arrive at 59th St. This mirrors how congestion actually moves through a network and makes predictions structurally more honest than per-station LSTM models.</p>
+    <p>The multi-branch architecture with structured feature perturbation is designed to answer <em>why</em> a hotspot forms, not just <em>whether</em> it will&mdash;a harder and more valuable question, since transit operations need causal levers, not just probability scores.</p>
+    <blockquote class="pull">&ldquo;Coffee does not cause rush hour, but it marks the neighborhoods where rush hour runs deepest.&rdquo;</blockquote>
   </section>
 
   <!-- 03 -->
   <section id="litreview">
     <h2 class="section-title"><span class="sec-num">03</span>Related Work</h2>
     <h4 class="micro">Spatio-Temporal Graph Networks for Transit Demand</h4>
-    <p>The dominant model in this area encodes transit stations as graph nodes and uses graph neural networks to capture spatial dependencies alongside temporal models. Researchers have constructed graphs from physical connections between stations, passenger flow sequence similarities, and functional correlations to learn effective spatio-temporal representations <a href="#ref-lu2025">[1]</a>. The combination of GATs with recurrent architectures like GRU is well-established; one prominent approach uses dilated convolutions to extract multi-dimensional temporal dependencies, then applies GRU on metro ridership data from two Chinese cities <a href="#ref-li2025">[2]</a>.</p>
-    <p>There has also been pushback on whether graph structure always helps. Some work argues that GCN-based models fail to capture global spatial correlations effectively, motivating hybrid architectures <a href="#ref-yang2024">[3]</a>. The LSTM-only baseline in this paper directly engages with that question, isolating the contribution of spatial message passing to hotspot prediction.</p>
+    <p>The dominant approach to station-level demand forecasting combines graph neural networks for spatial dependencies with recurrent architectures for temporal patterns. Researchers have constructed graphs from physical station connections, passenger flow similarities, and functional correlations <a href="#ref-lu2025">[1]</a>. The combination of graph attention layers with GRU is well-established; one recent approach uses dilated convolutions for multi-scale temporal extraction followed by GRU on metro ridership data from two Chinese cities <a href="#ref-li2025">[2]</a>. Our model differs in treating time as a flat feature vector (7-day window) rather than a recurrent state, a deliberate simplification given our limited training data.</p>
+    <p>There has been useful pushback on whether graph structure always helps. Some work argues that GCN-based models fail to capture global spatial correlations effectively, motivating hybrid designs <a href="#ref-yang2024">[3]</a>. The LSTM-only baseline in this paper engages directly with that question, isolating how much of our ST-GAT&rsquo;s gain comes from spatial message passing versus the richer feature set.</p>
     <h4 class="micro">Incorporating External Features: POI, Weather, Land Use</h4>
-    <p>Point-of-Interest (POI) data is widely used to capture the distribution of functional areas around stations; weather is a standard travel influence <a href="#ref-hu2024">[4]</a>. Work like ST-MFGCRN fuses land use, sociodemographics, and POI distribution through a sentinel attention mechanism <a href="#ref-han2024">[5]</a>. The caf&eacute; density branch in this model is a more specific and theoretically motivated version of the POI signal: rather than treating all nearby amenities as equivalent, it isolates third-place density as a behavioral driver and tests that hypothesis through structured attribution.</p>
-    <h4 class="micro">Text and Event-Based Signals</h4>
-    <p>Using natural language data in transit prediction is less common but has real precedent. Earlier approaches applied topic modeling to event descriptions with transit smart card data <a href="#ref-liang2023">[6]</a>. One study proposed a bi-directional LSTM combining tweet data with traffic and weather, specifically to handle non-recurring events that degrade accuracy in purely data-driven models <a href="#ref-essien2021">[7]</a>. Our use of Sentence-BERT on daily Manhattan news headlines extends this from event-specific triggers toward ambient urban context&mdash;an input type that remains largely unexplored.</p>
+    <p>Point-of-Interest (POI) data is widely used to capture functional area distributions around stations; weather is a standard travel influence <a href="#ref-hu2024">[4]</a>. ST-MFGCRN fuses land use, sociodemographics, and POI distributions through sentinel attention <a href="#ref-han2024">[5]</a>. The caf&eacute; density branch in our model is a more specific and theoretically motivated version of the POI signal: rather than treating all nearby amenities as interchangeable, it isolates third-place density as a behavioral driver and tests that hypothesis through structured attribution. We are not aware of prior work that introduces a dedicated attribution index for a single POI category in this manner.</p>
+    <h4 class="micro">Text and Event-Based Context</h4>
+    <p>Natural language signals in transit forecasting are less common but have real precedent. Early approaches applied topic modeling to event descriptions with smart card data <a href="#ref-liang2023">[6]</a>. A bi-directional LSTM combining tweets with traffic and weather specifically addressed non-recurring events that degrade accuracy in data-driven models <a href="#ref-essien2021">[7]</a>. We originally planned a fourth branch encoding daily Manhattan news headlines via Sentence-BERT, but excluded it after finding that with only 112 training days the text embeddings added variance without reducing loss. This is consistent with the finding that text signals are most useful for capturing discrete events (storms, parades, strikes) rather than ambient context over a short training window.</p>
     <h4 class="micro">Urban Hotspot Detection</h4>
-    <p>The broader hotspot detection literature mostly focuses on clustering mobility or trajectory data retrospectively <a href="#ref-yu2021">[8]</a>. Framing hotspot status as a classification target for a neural model moves the problem from retrospective identification to forward-looking prediction&mdash;the operationally useful formulation for transit management.</p>
+    <p>The broader hotspot detection literature mostly applies clustering to mobility trajectories retrospectively <a href="#ref-yu2021">[8]</a>. Framing hotspot status as a classification target for a forward-looking neural model is less common in North American transit contexts and is the operationally useful formulation: it supports decisions made before the morning, not after.</p>
     <h4 class="micro">What This Work Adds</h4>
-    <p>Prior work has established strong baselines for spatio-temporal graph prediction and multi-feature fusion, but has not combined these tools in the specific context of morning surge classification in a dense North American subway network, nor attempted to disentangle the contribution of third-place commercial density from commuter and environmental signals. The Coffee Contribution Index does not have a close analog in the existing literature.</p>
+    <p>Prior work has established strong baselines for spatio-temporal graph prediction and multi-feature fusion but has not examined how commercial POI density specifically contributes to morning surge classification in a dense North American subway network, nor attempted to disentangle that contribution from commuter and environmental signals at a per-station level. The Coffee Contribution Index does not have a direct analog in the literature we reviewed.</p>
   </section>
 
   <!-- 04 -->
   <section id="data">
     <h2 class="section-title"><span class="sec-num">04</span>Data</h2>
-    <p>We assemble four publicly available datasets aligned spatially at the Manhattan subway station level and temporally at daily resolution.</p>
+    <p>We assemble three publicly available datasets aligned spatially at the Manhattan subway station level and temporally at daily resolution.</p>
     <div class="stat-row">
       <div class="stat-pill"><span class="sv">123</span><span class="sl">Stations</span></div>
-      <div class="stat-pill"><span class="sv">95</span><span class="sl">Days</span></div>
-      <div class="stat-pill"><span class="sv">9,400</span><span class="sl">Station-days</span></div>
+      <div class="stat-pill"><span class="sv">112</span><span class="sl">Days</span></div>
+      <div class="stat-pill"><span class="sv">13,759</span><span class="sl">Station-days</span></div>
       <div class="stat-pill"><span class="sv">2,457</span><span class="sl">Caf&eacute; locations</span></div>
     </div>
     <div class="data-grid">
-      <div class="data-row"><div class="dk">Dataset</div><div class="dv" style="color:var(--crema);font-weight:600;">Role &middot; Description &middot; Source</div></div>
-      <div class="data-row"><div class="dk">MTA Hourly Ridership</div><div class="dv">Target + temporal. ~2M rows filtered to Manhattan 7&ndash;10am; produces ~9,400 station-day rows. <a href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-2022/wujg-7c2s" target="_blank">data.ny.gov</a></div></div>
-      <div class="data-row"><div class="dk">NYC Restaurant Inspections</div><div class="dv">Caf&eacute; density feature. 2,457 Manhattan coffee shop and bakery coordinates; 400m station-level density. <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" target="_blank">data.cityofnewyork.us</a></div></div>
-      <div class="data-row"><div class="dk">NOAA Daily Weather</div><div class="dv">Daily temperature and precipitation aligned by date. <a href="https://www.ncei.noaa.gov" target="_blank">ncei.noaa.gov</a></div></div>
-      <div class="data-row"><div class="dk">GDELT Project</div><div class="dv">Text embedding input. Manhattan-relevant headlines encoded via Sentence-BERT; PCA-reduced to low-dim urban context vectors. <a href="https://www.gdeltproject.org" target="_blank">gdeltproject.org</a></div></div>
+      <div class="data-row"><div class="dk">Dataset</div><div class="dv" style="font-weight:600;">Role &middot; Description &middot; Source</div></div>
+      <div class="data-row"><div class="dk">MTA Hourly Ridership</div><div class="dv">Target + temporal. Filtered to Manhattan stations, 7&ndash;10am window, Jan&ndash;Apr 2026; produces 13,759 station-day rows at 112 dates. <a href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-2022/wujg-7c2s" target="_blank">data.ny.gov</a></div></div>
+      <div class="data-row"><div class="dk">NYC Restaurant Inspections</div><div class="dv">Caf&eacute; density feature. 2,457 Manhattan coffee shop and bakery coordinates; 400m station-level density via BallTree haversine query. <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" target="_blank">data.cityofnewyork.us</a></div></div>
+      <div class="data-row"><div class="dk">NOAA Daily Weather</div><div class="dv">Daily maximum temperature (&#176;C) and precipitation (mm), aligned by date. 110 of 112 dates have real observations; two missing days are filled with zero before scaling. <a href="https://www.ncei.noaa.gov" target="_blank">ncei.noaa.gov</a></div></div>
     </div>
-    <div class="todo">Add 1&ndash;2 paragraphs: how you constructed the hotspot label (top-25% threshold), how the station graph was built (edges = proximity + shared line), any data quality issues encountered.</div>
+
+    <h4 class="micro">Hotspot Label</h4>
+    <p>A station-day is labeled a hotspot if its morning ridership is at or above the 75th percentile of all station-day ridership values in the dataset. That threshold is <strong>3,258 riders</strong> for the 7&ndash;10am window. The label is binary (1&nbsp;=&nbsp;hotspot, 0&nbsp;=&nbsp;not), and roughly 25% of station-days are positive by construction. We use this global threshold rather than a per-station one so the model learns an absolute standard of congestion, not a relative one&mdash;a quiet uptown station is not a hotspot just because it had a good day by its own standards.</p>
+
+    <h4 class="micro">Station Graph</h4>
+    <p>The graph connects two stations if their geodesic distance is under one kilometer or they share at least one subway route. Edge weights decay with distance: <em>w<sub>ij</sub> = exp(&minus;&alpha; d<sub>ij</sub>)</em> where <em>&alpha;</em> is fit to place median weight at 0.5. This yields a graph with connectivity ranging from 2 edges (TRAM2) to 69 edges (59 St&ndash;Columbus Circle). The adjacency matrix is stored as a sparse PyTorch tensor and loaded once at training time. TRAM1 and TRAM2 (Roosevelt Island Tramway stops) are included as peripheral nodes; their connectivity to the East Side network provides mild structural signal.</p>
+
     <figure>
-      <div class="fig-placeholder">Figure 2 &mdash; Data overview<br><br>Left: ridership distribution histogram with top-25% threshold. Right: station graph visualization.<br>Replace with: &lt;img src="assets/fig2_data.png" alt="..."&gt;</div>
-      <figcaption><strong>Fig. 2</strong> &mdash; <em>Left:</em> Distribution of 7&ndash;10am station-day ridership. Dashed line = hotspot threshold. <em>Right:</em> Spatial graph over 123 Manhattan stations. Edge weight encodes geographic proximity and shared line connectivity.</figcaption>
+      <img src="../assets/fig2.png" alt="Left panel: histogram of 7–10am morning ridership with the hotspot threshold marked at 3,258. Right panel: spatial graph of 123 Manhattan subway stations with edges drawn between proximate or same-line stations."/>
+      <figcaption><strong>Fig. 2</strong> &mdash; <em>Left:</em> Distribution of 7&ndash;10am station-day ridership across 13,759 observations. The dashed line marks the hotspot threshold at 3,258 riders (75th percentile). <em>Right:</em> Spatial graph over 123 Manhattan stations. Edge opacity reflects connection weight; denser clusters in Midtown and lower Manhattan reflect both proximity and shared-line connectivity.</figcaption>
     </figure>
   </section>
 
   <!-- 05 -->
   <section id="formulation">
     <h2 class="section-title"><span class="sec-num">05</span>ML Formulation</h2>
-    <p>Let <em>G = (V, E)</em> be the station graph with |V|&nbsp;=&nbsp;123 nodes. For each station <em>v&nbsp;&isin;&nbsp;V</em> and day <em>t</em>, the model receives four input streams:</p>
+    <p>Let <em>G = (V, E)</em> be the station graph with |V|&nbsp;=&nbsp;123 nodes. For each station <em>v&nbsp;&isin;&nbsp;V</em> and day <em>t</em>, the model receives three input streams:</p>
     <div class="data-grid" style="margin:24px 0;">
-      <div class="data-row"><div class="dk">x<sub>ride</sub></div><div class="dv">7-day historical ridership sequence (T &times; 1)</div></div>
-      <div class="data-row"><div class="dk">x<sub>caf&eacute;</sub></div><div class="dv">Static caf&eacute; density within 400m (scalar)</div></div>
-      <div class="data-row"><div class="dk">x<sub>wx</sub></div><div class="dv">Daily temperature and precipitation (2-dim)</div></div>
-      <div class="data-row"><div class="dk">x<sub>news</sub></div><div class="dv">Sentence-BERT headline embedding, PCA-reduced to dim <em>d</em></div></div>
+      <div class="data-row"><div class="dk">x<sub>ride</sub>(v, t)</div><div class="dv">7-day morning ridership window ending at <em>t&minus;1</em>, shaped (7,) per station. Scaled with a StandardScaler fitted on the training split.</div></div>
+      <div class="data-row"><div class="dk">x<sub>caf&eacute;</sub>(v)</div><div class="dv">Static caf&eacute; count within 400m of station <em>v</em>, computed once via BallTree haversine query. Scaled independently.</div></div>
+      <div class="data-row"><div class="dk">x<sub>wx</sub>(t)</div><div class="dv">Daily maximum temperature and precipitation (2-dim), broadcast to all stations on day <em>t</em>. Fitted on training days only.</div></div>
     </div>
-    <p>Output: <em>&ycirc;<sub>v,t</sub>&nbsp;&isin;&nbsp;[0,1]</em>, the predicted probability that station <em>v</em> is a hotspot on day <em>t</em>. Labels are binary (<em>y&nbsp;=&nbsp;1</em> if top-25% ridership, else 0). Objective: binary cross-entropy.</p>
+    <p>Output: <em>&ycirc;<sub>v,t</sub>&nbsp;&isin;&nbsp;[0,1]</em>, the predicted probability that station <em>v</em> is a hotspot on day <em>t</em>. Labels are binary. Objective: <strong>BCEWithLogitsLoss</strong> with <code>pos_weight&nbsp;=&nbsp;3.0</code> to compensate for the 3:1 class imbalance. We use <code>reduction="none"</code> and mask out station-days with missing ridership data before computing the mean loss.</p>
     <div class="math-block">
       <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
         <mi>&#x2112;</mi><mo>=</mo><mo>&#x2212;</mo>
-        <mfrac><mn>1</mn><mi>N</mi></mfrac>
-        <munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover>
+        <mfrac><mn>1</mn><mrow><mo>|</mo><mi>&#x1D4DC;</mi><mo>|</mo></mrow></mfrac>
+        <munder><mo>&#x2211;</mo><mrow><mo>(</mo><mi>v</mi><mo>,</mo><mi>t</mi><mo>)</mo><mo>&#x2208;</mo><mi>&#x1D4DC;</mi></mrow></munder>
         <mo>[</mo>
-        <msub><mi>y</mi><mi>i</mi></msub><mo>log</mo><msub><mover><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub>
+        <msub><mi>y</mi><mrow><mi>v</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>log</mo><msub><mover><mi>y</mi><mo>^</mo></mover><mrow><mi>v</mi><mo>,</mo><mi>t</mi></mrow></msub>
         <mo>+</mo>
-        <mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>y</mi><mi>i</mi></msub><mo>)</mo>
-        <mo>log</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mo>)</mo>
+        <mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>y</mi><mrow><mi>v</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>)</mo>
+        <mo>log</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>y</mi><mo>^</mo></mover><mrow><mi>v</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>)</mo>
         <mo>]</mo>
       </math>
     </div>
-    <p>Primary evaluation: <strong>F1 score</strong> (handles class imbalance; 75% negative labels) and <strong>AUC-ROC</strong> (threshold-independent). Accuracy is not used as a primary metric&mdash;a model predicting &ldquo;never hotspot&rdquo; achieves 75% accuracy and is useless.</p>
+    <p>where <em>&#x1D4DC;</em> is the set of valid station-day observations. Primary evaluation metrics are <strong>F1 score</strong> (handles class imbalance; a model predicting &ldquo;never hotspot&rdquo; scores F1&nbsp;=&nbsp;0, not 75% accuracy) and <strong>AUC-ROC</strong> (threshold-independent). The data is split chronologically: train = days 1&ndash;87, validation = days 88&ndash;97, test = days 98&ndash;112. All scalers are fitted on training data only.</p>
   </section>
 
   <!-- 06 -->
   <section id="model">
     <h2 class="section-title"><span class="sec-num">06</span>Model Architecture</h2>
-    <p>The full model is a <strong>Spatio-Temporal Graph Attention Network + GRU</strong> (ST-GAT-GRU) with four input branches fused before the classification head.</p>
+    <p>The model is a three-branch Graph Attention Network we call <strong>SimplifiedGAT</strong>. The &ldquo;simplified&rdquo; refers to the deliberate removal of an outer temporal GRU: with only 87 training days, a recurrent layer over the day dimension risked fitting noise rather than structure. Instead, the 7-day ridership window enters as a flat vector, treated as a multi-feature input rather than a sequence.</p>
+
     <figure>
-      <div class="fig-placeholder">Figure 3 &mdash; Architecture diagram<br><br>Four branches &rarr; encoders &rarr; fusion &rarr; GAT message passing &rarr; GRU &rarr; sigmoid output.<br>Replace with: &lt;img src="assets/fig3_arch.png" alt="..."&gt;</div>
-      <figcaption><strong>Fig. 3</strong> &mdash; ST-GAT-GRU architecture. Four feature branches are encoded separately, fused at a station embedding layer, propagated through graph attention message passing, and integrated temporally via GRU before the binary classification head.</figcaption>
+      <img src="../assets/fig3.png" alt="Architecture diagram showing three input branches (ridership, café, weather) feeding into a fusion layer, then two GATConv layers with a residual skip connection, then a classification head producing a per-station hotspot probability."/>
+      <figcaption><strong>Fig. 3</strong> &mdash; SimplifiedGAT architecture. Three feature branches encode ridership, caf&eacute; density, and weather independently, then fuse into a shared 64-dim station embedding. Two GATConv layers perform spatial message passing. A residual connection from the fusion layer into the second GAT prevents over-smoothing. The classification head applies Dropout(0.3) before the final linear projection.</figcaption>
     </figure>
-    <div class="todo">Describe each component: (1) how each branch encodes its input, (2) how graph attention message passing works, (3) how the GRU integrates spatial embeddings over time, (4) the classification head. Include key hyperparameters: hidden dim, GAT heads, GRU layers, dropout.</div>
+
+    <h4 class="micro">Branch Encoding</h4>
+    <p>Each branch maps its input to a 64-dimensional station-level embedding. The <strong>ridership branch</strong> applies <code>Linear(7&rarr;64) + ReLU</code> to the 7-day window for each station. The <strong>caf&eacute; branch</strong> applies <code>Linear(1&rarr;64) + ReLU</code> to the scalar caf&eacute; count (the same static value is used across all days for a given station). The <strong>weather branch</strong> applies <code>Linear(2&rarr;64) + ReLU</code> to the two-dimensional weather vector, then broadcasts it to all 123 nodes.</p>
+
+    <h4 class="micro">Fusion and Graph Attention</h4>
+    <p>The three 64-dim embeddings are concatenated into a 192-dim vector per station, then compressed by <code>Linear(192&rarr;64) + ReLU</code> into a shared station embedding. This embedding enters the graph attention stack.</p>
+    <p><strong>GAT layer 1</strong> is <code>GATConv(64&rarr;64, heads=4, concat=True)</code>, producing a 256-dimensional output by concatenating the 4 attention heads. <strong>GAT layer 2</strong> is <code>GATConv(256&rarr;64, heads=4, concat=False)</code>, averaging the heads back to 64 dimensions. After the second layer, we add a residual connection from the fusion output: <code>x = ReLU(x_gat2 + x_fused)</code>. This skip connection was critical: without it, the graph attention mechanism collapsed all 123 node representations toward the same embedding, causing the model to predict near-constant probabilities and achieve AUC near 0.5. The residual preserves station-specific information across the two-hop neighborhood aggregation.</p>
+
+    <h4 class="micro">Classification Head and Training</h4>
+    <p>A <code>Dropout(0.3)</code> layer followed by <code>Linear(64&rarr;1)</code> produces one logit per station. At inference, sigmoid maps each logit to a probability in [0,1]; the classification threshold is 0.5. Total parameters: 96,513.</p>
+    <p>Optimizer: <strong>AdamW</strong> with lr&nbsp;=&nbsp;1e&minus;2 and weight_decay&nbsp;=&nbsp;1e&minus;3. Learning rate scheduler: <strong>ReduceLROnPlateau</strong> (mode&nbsp;=&nbsp;max, factor&nbsp;=&nbsp;0.5, patience&nbsp;=&nbsp;5) monitoring validation AUC. The model converged at <strong>epoch 7</strong> with validation F1&nbsp;=&nbsp;0.9386.</p>
+
     <h4 class="micro">Baselines</h4>
-    <p>Two LSTM baselines treat stations independently (no graph structure): <strong>Model 0</strong> uses ridership sequence only (3-day window); <strong>Model 1</strong> adds caf&eacute; density (7-day window). The LSTM&rarr;GAT comparison isolates the value of spatial message passing; the Model 0&rarr;1 comparison isolates caf&eacute; density independent of graph structure.</p>
+    <p>Two LSTM baselines treat each station as an independent time series, with no graph structure. <strong>Model 0</strong> uses ridership only (3-day window). <strong>Model 1</strong> appends static caf&eacute; density to the LSTM input (7-day window). Comparing Model 0 to Model 1 isolates the caf&eacute; signal without spatial reasoning; comparing Model 1 to ST-GAT isolates the contribution of graph attention.</p>
   </section>
 
   <!-- 07 -->
   <section id="experiments">
     <h2 class="section-title"><span class="sec-num">07</span>Experiments &amp; Results</h2>
-    <p>Adding caf&eacute; density as a static station-level feature improved every metric, confirming that third-place density adds predictive signal beyond ridership history alone.</p>
+    <p>Results on the held-out test set (last 15 days of the data window):</p>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Model</th><th>Features</th><th class="num">F1</th><th class="num">AUC</th></tr>
+          <tr><th>Model</th><th>Features</th><th class="num">F1</th><th class="num">AUC</th><th class="num">Precision</th><th class="num">Recall</th></tr>
         </thead>
         <tbody>
-          <tr><td>Model 0 &mdash; LSTM</td><td>Ridership only (3-day)</td><td class="num">0.48</td><td class="num">0.71</td></tr>
-          <tr><td>Model 1 &mdash; LSTM + Caf&eacute;</td><td>Ridership + caf&eacute; density (7-day)</td><td class="num better">0.59</td><td class="num better">0.79</td></tr>
-          <tr><td>ST-GAT-GRU (full)</td><td>All branches + graph</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
-          <tr><td>ST-GAT-GRU &minus; caf&eacute;</td><td>Ablation: no caf&eacute; branch</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
-          <tr><td>ST-GAT-GRU &minus; weather</td><td>Ablation: no weather</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
-          <tr><td>ST-GAT-GRU &minus; news</td><td>Ablation: no news embeddings</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
+          <tr>
+            <td>Model 0 &mdash; LSTM</td>
+            <td>Ridership (3-day)</td>
+            <td class="num">0.48</td><td class="num">0.71</td>
+            <td class="num">&mdash;</td><td class="num">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Model 1 &mdash; LSTM + Caf&eacute;</td>
+            <td>Ridership + caf&eacute; density (7-day)</td>
+            <td class="num">0.59</td><td class="num">0.79</td>
+            <td class="num">&mdash;</td><td class="num">&mdash;</td>
+          </tr>
+          <tr>
+            <td><strong>ST-GAT (full)</strong></td>
+            <td>All branches + graph</td>
+            <td class="num better">0.91</td><td class="num better">0.99</td>
+            <td class="num better">0.95</td><td class="num">0.87</td>
+          </tr>
         </tbody>
       </table>
     </div>
-    <div class="todo">Fill in ST-GAT-GRU results. Then write results analysis (~200 words): What does the F1 gap between Model 0 and Model 1 tell us? What does LSTM&rarr;GAT tell us? Any specific stations or neighborhoods where GAT improved most?</div>
+
     <figure>
-      <div class="fig-placeholder">Figure 4 &mdash; Results comparison<br><br>Grouped bar chart (F1 + AUC) across all models, or ROC curves on the same axes.<br>Replace with: &lt;img src="assets/fig4_results.png" alt="..."&gt;</div>
-      <figcaption><strong>Fig. 4</strong> &mdash; Model comparison. LSTM&rarr;GAT gap isolates value of spatial message passing. Caf&eacute; ablation isolates third-place density contribution.</figcaption>
+      <img src="../assets/fig4.png" alt="Grouped bar chart showing F1 and AUC for three models: LSTM ridership-only (F1=0.48, AUC=0.71), LSTM with café (F1=0.59, AUC=0.79), and ST-GAT (F1=0.91, AUC=0.99). The ST-GAT bars are highlighted."/>
+      <figcaption><strong>Fig. 4</strong> &mdash; Model comparison on the test set. Left bars (gold) are F1; right bars (cream) are AUC. The gap between the two LSTM models isolates the caf&eacute; density signal; the gap between LSTM+caf&eacute; and ST-GAT isolates spatial message passing via graph attention.</figcaption>
     </figure>
+
+    <h4 class="micro">Reading the Numbers</h4>
+    <p>The results decompose cleanly into two gaps. The first, from LSTM-0 to LSTM-1 (+11 F1 points, +8 AUC), comes from a single static scalar&mdash;caf&eacute; count within 400 meters. If that scalar were just a noisy proxy for ridership, it would add no signal to a model already trained on ridership history; the fact that it does means the model is picking up something about neighborhood character that the ridership time series does not contain.</p>
+    <p>The second gap, from LSTM-1 to ST-GAT (+32 F1 points, +20 AUC), isolates the value of spatial message passing. The graph attention layers allow the model to condition each station&rsquo;s prediction on the recent state of its neighbors&mdash;a surge developing one stop away is informative about what is about to happen here. This mirrors how congestion actually propagates through the subway network, which is why the structural improvement is so large.</p>
+    <p>The confusion matrix (1,301 true negatives, 23 false positives, 70 false negatives, 449 true positives) shows the model is precision-dominant: it rarely flags a quiet station as a hotspot, but it misses about 13% of actual hotspots. For operational use, this is the conservative failure mode&mdash;unexpected surges go unpredicted, but false alarms are rare.</p>
+    <p>Was AI really needed? A threshold rule on yesterday&rsquo;s ridership achieves roughly 70% accuracy but struggles with the days that diverge from recent patterns: weather events, unusually warm Mondays in March, the occasional Friday that empties office buildings. The graph attention layer earns its keep on those days, incorporating correlated patterns from neighboring stations to catch what the local history misses.</p>
   </section>
 
   <!-- 08 -->
   <section id="cci">
     <h2 class="section-title"><span class="sec-num">08</span>Coffee Contribution Index</h2>
-    <p>The Coffee Contribution Index (CCI) quantifies how strongly third-place density drives hotspot formation at each station. It is computed through structured feature perturbation: we zero out the caf&eacute; density branch input for each station and measure the resulting drop in predicted hotspot probability, averaged across days.</p>
-    <div class="todo">Describe the CCI computation precisely: (1) the perturbation procedure, (2) how you normalize or threshold the index, (3) any connection to formal attribution methods (SHAP, integrated gradients). Include math if applicable.</div>
+    <p>The ST-GAT predicts hotspot probabilities well, but the richer question is: how much does the caf&eacute; branch actually contribute to those predictions, and does it differ across the city in a way that makes geographic sense? The <strong>Coffee Contribution Index</strong> (CCI) is our answer.</p>
+
+    <h4 class="micro">Computation</h4>
+    <p>CCI is a zero-ablation attribution measure. For each test day <em>t</em> and each station <em>v</em>, we run the trained model twice: once with the full input, and once with the caf&eacute; branch input set to zero before it passes through the encoder. The difference in output probabilities, averaged over the 15 test days, gives a signed contribution score:</p>
+    <div class="math-block">
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+        <msub><mi>CCI</mi><mi>raw</mi></msub><mo>(</mo><mi>v</mi><mo>)</mo>
+        <mo>=</mo>
+        <mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>T</mi><mi>test</mi></msub><mo>|</mo></mrow></mfrac>
+        <munder><mo>&#x2211;</mo><mrow><mi>t</mi><mo>&#x2208;</mo><msub><mi>T</mi><mi>test</mi></msub></mrow></munder>
+        <mo>[</mo>
+        <mi>&#x3C3;</mi><mo>(</mo><mi>f</mi><mo>(</mo><msub><mi>x</mi><mrow><mi>v</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>)</mo><mo>)</mo>
+        <mo>&#x2212;</mo>
+        <mi>&#x3C3;</mi><mo>(</mo><mi>f</mi><mo>(</mo><msub><mi>x</mi><mrow><mi>v</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>|</mo><msub><mi>x</mi><mi>caf&eacute;</mi></msub><mo>&#x2192;</mo><mn>0</mn><mo>)</mo><mo>)</mo>
+        <mo>]</mo>
+      </math>
+    </div>
+    <p>A <strong>positive CCI</strong> means the caf&eacute; branch raises the hotspot probability: removing it causes the model to predict a lower chance of surge. This is the pattern at high-caf&eacute; downtown and Midtown stations, where the model relies on caf&eacute; density as a signal of neighborhood commercial intensity.</p>
+    <p>A <strong>negative CCI</strong> means that zeroing the caf&eacute; branch actually raises the predicted probability: the model expects a low-caf&eacute; station to be less active, and removing that suppressive signal causes it to over-predict. This appears at uptown stations where caf&eacute; density is genuinely low. The signed measure captures both effects in a single chart rather than treating low-CCI stations as simply &ldquo;unaffected&rdquo;.</p>
+    <p>We evaluated three attribution methods during development: zero-ablation (final choice), mean-ablation (setting caf&eacute; input to its training-set mean rather than zero), and gradient sensitivity (d&Sigma;p / d x_caf&eacute;). Mean-ablation and zero-ablation produced nearly identical results because StandardScaler maps the training mean to zero; the encoded representation under either ablation is essentially the same. Gradient sensitivity produced higher variance estimates but picked out uptown stations as most &ldquo;sensitive&rdquo;&mdash;counterintuitive given their low caf&eacute; counts&mdash;because gradient magnitude reflects local model uncertainty rather than directional contribution. Zero-ablation is preferred here for interpretability: the sign is directly meaningful and the magnitude represents an average probability shift in units the reader can verify.</p>
+
     <figure>
-      <div class="fig-placeholder">Figure 5 &mdash; Coffee Contribution Index map<br><br>Manhattan stations colored by CCI value (low = cool, high = gold/warm). Label high-CCI stations by name.<br>Replace with: &lt;img src="assets/fig5_cci.png" alt="..."&gt;</div>
-      <figcaption><strong>Fig. 5</strong> &mdash; Coffee Contribution Index across 123 Manhattan subway stations. Warmer colors indicate stations where caf&eacute; density more strongly drives hotspot formation, beyond what ridership history and weather alone explain.</figcaption>
+      <img src="../assets/fig5.png" alt="Diverging horizontal bar chart showing Coffee Contribution Index for top 20 positive and top 15 negative stations. Gold bars extend right for downtown/Midtown stations; muted brown bars extend left for uptown stations."/>
+      <figcaption><strong>Fig. 5</strong> &mdash; Coffee Contribution Index: diverging attribution across Manhattan subway stations. Gold bars (right) show stations where caf&eacute; density boosts the hotspot prediction; muted bars (left) show stations where low caf&eacute; density suppresses it. Values are mean &Delta;probability over 15 test days.</figcaption>
     </figure>
-    <div class="todo">Analyze the CCI map: Which neighborhoods show the highest caf&eacute;-driven hotspot formation? Is there a pattern (Village/SoHo vs. Midtown)? Any surprising findings?</div>
+
+    <h4 class="micro">Geographic Pattern</h4>
+    <p>The results are geographically coherent. The highest positive CCI stations cluster in Midtown and lower Manhattan: 57 St&ndash;7 Av (CCI&nbsp;=&nbsp;+0.036), 47&ndash;50 Sts Rockefeller Center, 34 St Herald Square. These neighborhoods have dense caf&eacute; clusters&mdash;57 St&ndash;7 Av has roughly 60 coffee shops within 400 meters&mdash;and morning activity that exceeds what ridership history alone would predict. The model treats high caf&eacute; density as evidence of a neighborhood where commercial morning activity concentrates, pushing hotspot probability upward.</p>
+    <p>The largest negative CCI values appear at uptown stations: 125 St A,C,B,D (CCI&nbsp;=&nbsp;&minus;0.133), 145 St, 163 St&ndash;Amsterdam Av. These stations have two to four caf&eacute;s within radius. Because the model has learned to associate low caf&eacute; counts with lower-activity neighborhoods, it applies downward pressure on the hotspot probability; removing that signal loosens the suppression and causes the model to predict higher than the true pattern warrants.</p>
+    <p>This asymmetry matters for interpretation. The CCI is not simply a measure of how much the model pays attention to the caf&eacute; branch in an absolute sense; it is a directional signal. Downtown stations benefit from caf&eacute; density; uptown stations are, in a real sense, penalized by its absence. Whether this reflects a genuine behavioral difference or a confound with neighborhood income and employment density is something the CCI alone cannot resolve&mdash;but it is a testable hypothesis for future work.</p>
   </section>
 
   <!-- 09 -->
   <section id="limitations">
     <h2 class="section-title"><span class="sec-num">09</span>Limitations &amp; Future Work</h2>
-    <div class="todo">~200 words. Address: (1) Is 95 days enough training data? (2) Caf&eacute; density is static &mdash; appropriate? (3) Is the CCI causal or correlational? (4) What would you try with 3 more months? Suggestions: longer time range, dynamic caf&eacute; density from Yelp, multi-city generalization, online learning as MTA data streams in.</div>
+    <p>The most significant constraint is the training window. Our 112 days span January through late April 2026, capturing winter and early spring but none of the summer demand peaks, back-to-school September spikes, or holiday-week depressions that characterize a full year of New York transit. A model trained only on cold-weather months may have learned seasonal patterns specific to that period rather than general hotspot dynamics. Extending to a full calendar year would substantially reduce this risk.</p>
+    <p>Caf&eacute; density is static. We count locations registered in the NYC restaurant inspection database and use those counts throughout training and evaluation. In practice, caf&eacute;s open and close, outdoor seating alters the effective radius, and some database entries are stale. A live feed from Yelp or Google Places would make the caf&eacute; signal dynamic and could enable modeling of how ridership patterns shift when a major anchor caf&eacute; opens near a previously low-density station.</p>
+    <p>The CCI measures model sensitivity, not behavioral causality. We cannot conclude from a positive CCI that building more caf&eacute;s near a station would increase ridership. The attribution reflects what the model has learned from the joint distribution of caf&eacute; density, ridership, and weather across 112 days. That distribution is confounded by neighborhood characteristics&mdash;income, employment type, residential density&mdash;which correlate with both caf&eacute; counts and transit demand. Teasing apart causation from correlation would require a natural experiment: a sudden new caf&eacute; cluster (perhaps after a retail-to-food rezoning) that allows a before/after comparison.</p>
+    <p>Given three more months, we would pursue: (1) a full calendar year of training data to capture seasonality; (2) dynamic caf&eacute; density updated weekly from live business data; (3) a multi-city replication test in Chicago or Washington D.C. to examine whether the caf&eacute;-hotspot relationship generalizes beyond the specific commercial geography of Manhattan; and (4) a longitudinal study tracking changes in CCI scores as the restaurant landscape in specific neighborhoods evolves.</p>
   </section>
 
   <!-- 10 -->
   <section id="ethics">
     <h2 class="section-title"><span class="sec-num">10</span>Ethics</h2>
-    <div class="todo">~150 words. Address: (1) Privacy &mdash; aggregate data now, but fine-grained mobility prediction could enable surveillance if extended. (2) Equity &mdash; does the model perform equally across neighborhoods? (3) Commercial use &mdash; could the CCI accelerate gentrification by guiding businesses toward high-influence stations?</div>
+    <p>This project uses publicly available, aggregate data: MTA ridership tallied by station and day, restaurant registration records, and weather observations. No individual trips are tracked or reconstructed. The finest-grained prediction is a station-day probability score, which does not enable re-identification of any person&rsquo;s movements.</p>
+    <p>That said, the equity implications deserve careful attention. The model learns from the existing distribution of ridership and caf&eacute; density, both of which reflect decades of unequal urban investment. Uptown stations carry lower caf&eacute; density not because their riders need transit less, but partly because commercial investment in those neighborhoods has historically lagged. A CCI that assigns negative scores to uptown stations could, if misread as a statement about their importance, justify reducing service at exactly the stations whose riders have fewest alternatives.</p>
+    <p>Commercial use of the CCI raises a related concern. If a business used this analysis to identify high-CCI stations as prime locations for new caf&eacute;s&mdash;reasoning that dense caf&eacute; clusters correlate with high morning foot traffic&mdash;it could contribute to the displacement of diverse businesses in already-transitioning neighborhoods. The same is true if transit planners used CCI-weighted station importance to justify capital investment decisions, potentially directing resources toward already well-served Midtown stations.</p>
+    <p>Any deployment of attribution-based analysis for actual planning decisions should be paired with equity audits comparing model performance across income quartiles, and with explicit representation from the communities whose transit access is most affected. The model is a tool; its implications depend entirely on how it is used.</p>
   </section>
 
   <!-- 11 -->
@@ -648,6 +695,7 @@ footer a:hover { color: var(--accent); }
       <li id="ref-liang2023">Liang, Y., Liu, Y., Wang, X., &amp; Zhao, Z. (2023). <em>Exploring large language models for human mobility prediction under public events</em>. arXiv:2311.17351. <a href="https://doi.org/10.48550/arXiv.2311.17351" target="_blank">arXiv:2311.17351</a></li>
       <li id="ref-essien2021">Essien, A., Petrounias, I., Sampaio, P. et al. (2021). A deep-learning model for urban traffic flow prediction with traffic events mined from Twitter. <em>World Wide Web</em>, 24, 1345&ndash;1368. <a href="https://doi.org/10.1007/s11280-020-00800-3" target="_blank">doi:10.1007/s11280-020-00800-3</a></li>
       <li id="ref-yu2021">Yu, Q., Chen, C., Sun, L., &amp; Zheng, X. (2021). Urban hotspot area detection using nearest-neighborhood-related quality clustering on taxi trajectory data. <em>ISPRS International Journal of Geo-Information</em>, 10(7), 473. <a href="https://doi.org/10.3390/ijgi10070473" target="_blank">doi:10.3390/ijgi10070473</a></li>
+      <li id="ref-oldenburg1989">Oldenburg, R. (1989). <em>The Great Good Place: Caf&eacute;s, Coffee Shops, Community Centers, Beauty Parlors, General Stores, Bars, Hangouts, and How They Get You Through the Day</em>. Paragon House.</li>
     </ol>
   </section>
 
