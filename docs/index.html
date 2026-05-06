@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Morning Brews & Morning Rush</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #ffffff;
+  --surface:     #ffffff;
+  --surface-alt: #f7f4f1;
+  --border:      #d6cdc5;
+  --border-light:#ede8e3;
+  --text:        #111111;
+  --text-muted:  #5a4a3a;
+  --text-light:  #9e8a78;
+  --accent:      #3b2010;
+  --accent-hover:#6b3a1f;
+
+  --ff: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  --ff-mono: 'Courier New', Courier, monospace;
+
+  --sidebar-w: 220px;
+  --content-w: 700px;
+}
+
+html { font-size: 15px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff);
+  font-weight: 300;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.shell { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+aside.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.sidebar-brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+.sidebar-brand .issue-tag {
+  font-size: 0.68rem;
+  letter-spacing: .06em;
+  color: var(--text-light);
+  margin-bottom: 8px;
+  display: block;
+}
+.sidebar-brand h2 {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.sidebar-authors {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+.sidebar-authors p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin: 0;
+}
+.sidebar-authors a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.72rem;
+}
+.sidebar-authors a:hover { color: var(--accent-hover); }
+
+.nav-label {
+  font-size: 0.6rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  padding: 20px 24px 6px;
+}
+
+nav.toc { flex: 1; padding: 0 0 20px; }
+nav.toc a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 24px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color .12s;
+  line-height: 1.4;
+  border-left: 2px solid transparent;
+}
+nav.toc a .num {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: var(--text-light);
+  flex-shrink: 0;
+  min-width: 18px;
+}
+nav.toc a:hover, nav.toc a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+nav.toc a:hover .num, nav.toc a.active .num { color: var(--accent); }
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-light);
+}
+.sidebar-footer a {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  text-decoration: none;
+}
+.sidebar-footer a:hover { color: var(--accent); }
+
+/* ── Main ── */
+main {
+  flex: 1;
+  min-width: 0;
+  max-width: var(--content-w);
+  padding: 0 56px 100px;
+  background: var(--surface);
+  border-right: 1px solid var(--border-light);
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 60px 0 44px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 56px;
+}
+.hero-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: .06em;
+  color: var(--text-light);
+  margin-bottom: 18px;
+}
+.hero h1 {
+  font-size: 2.4rem;
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -.01em;
+}
+.hero h1 em { font-style: italic; color: var(--accent-hover); }
+.hero-sub {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  max-width: 480px;
+}
+.hero-meta { display: flex; gap: 28px; flex-wrap: wrap; }
+.hero-meta-item { font-size: 0.75rem; }
+.hero-meta-item .label {
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 0.6rem;
+  display: block;
+  margin-bottom: 2px;
+}
+.hero-meta-item .val { color: var(--text-muted); }
+
+/* ── SECTIONS ── */
+section { margin-bottom: 64px; scroll-margin-top: 28px; }
+
+h2.section-title {
+  font-size: 0.65rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+h2.section-title .sec-num {
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+}
+h2.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+h3.subsec {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text);
+  margin: 32px 0 10px;
+  line-height: 1.25;
+}
+h3.subsec:first-of-type { margin-top: 0; }
+
+h4.micro {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 24px 0 8px;
+}
+
+p { font-size: 0.93rem; margin-bottom: 1em; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+strong { font-weight: 600; }
+em { font-style: italic; }
+
+/* ── TODO ── */
+.todo {
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+  padding: 14px 18px;
+  margin: 20px 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.todo::before { content: "✏  TODO — "; font-weight: 600; color: var(--text-light); }
+
+/* ── Pull quote ── */
+blockquote.pull {
+  margin: 32px 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--border);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── Figures ── */
+figure { margin: 32px 0; }
+.fig-placeholder {
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+figure img { width: 100%; display: block; border: 1px solid var(--border); }
+figcaption {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+figcaption strong { font-weight: 600; color: var(--text); }
+
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin: 28px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+thead tr { border-bottom: 1px solid var(--border); }
+th {
+  padding: 8px 14px;
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: 0.63rem;
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  vertical-align: top;
+  line-height: 1.45;
+}
+tr:hover td { background: var(--surface-alt); }
+.num { text-align: right; font-family: var(--ff-mono); }
+.better { color: var(--accent); font-weight: 600; }
+.pending { color: var(--text-light); font-style: italic; }
+
+/* ── Math ── */
+.math-block {
+  text-align: center;
+  margin: 24px 0;
+  overflow-x: auto;
+  padding: 18px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+}
+
+/* ── Code ── */
+code {
+  font-family: var(--ff-mono);
+  font-size: 0.82em;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  padding: 1px 5px;
+  color: var(--text);
+}
+
+/* ── Data grid ── */
+.data-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
+  margin: 24px 0;
+}
+.data-row { display: grid; grid-template-columns: 180px 1fr; background: var(--surface); }
+.data-row:first-child { background: var(--surface-alt); }
+.data-row > div { padding: 10px 14px; font-size: 0.78rem; line-height: 1.5; }
+.data-row .dk { color: var(--text-muted); font-weight: 600; font-size: 0.73rem; }
+.data-row .dv { color: var(--text); border-left: 1px solid var(--border-light); }
+
+/* ── Stat pills ── */
+.stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+.stat-pill {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  padding: 12px 18px;
+  flex: 1;
+  min-width: 100px;
+}
+.stat-pill .sv {
+  font-family: var(--ff-mono);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text);
+  display: block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-pill .sl {
+  font-size: 0.63rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+/* ── References ── */
+ol.refs {
+  padding-left: 20px;
+  counter-reset: refcount;
+  list-style: none;
+}
+ol.refs li {
+  counter-increment: refcount;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 10px;
+  padding-left: 6px;
+  border-left: 1px solid var(--border-light);
+  position: relative;
+}
+ol.refs li::before {
+  content: counter(refcount);
+  position: absolute;
+  left: -20px;
+  top: 0;
+  font-family: var(--ff-mono);
+  font-size: 0.65rem;
+  color: var(--text-light);
+}
+ol.refs a { font-size: 0.75rem; color: var(--accent); }
+ol.refs a:hover { color: var(--accent-hover); }
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 56px 32px;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  letter-spacing: .02em;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: var(--surface);
+}
+footer a { color: var(--text-light); text-decoration: none; }
+footer a:hover { color: var(--accent); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  aside.sidebar { display: none; }
+  main { padding: 0 24px 80px; }
+  .hero h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <span class="issue-tag">STAT W3106 · Spring 2026</span>
+    <h2>Morning Brews<br>&amp; Morning Rush</h2>
+  </div>
+  <div class="sidebar-authors">
+    <p>
+      Ramya Subramanian<br>
+      <a href="mailto:rs4379@barnard.edu">rs4379@barnard.edu</a><br><br>
+      Sachi Patel<br>
+      <a href="mailto:sdp2173@barnard.edu">sdp2173@barnard.edu</a><br><br>
+      Hailey Gamer<br>
+      <a href="mailto:heg2140@barnard.edu">heg2140@barnard.edu</a>
+    </p>
+  </div>
+  <div class="nav-label">Contents</div>
+  <nav class="toc" id="toc">
+    <a href="#abstract"><span class="num">00</span>Abstract</a>
+    <a href="#intro"><span class="num">01</span>Introduction</a>
+    <a href="#background"><span class="num">02</span>Background</a>
+    <a href="#litreview"><span class="num">03</span>Related Work</a>
+    <a href="#data"><span class="num">04</span>Data</a>
+    <a href="#formulation"><span class="num">05</span>ML Formulation</a>
+    <a href="#model"><span class="num">06</span>Model Architecture</a>
+    <a href="#experiments"><span class="num">07</span>Experiments</a>
+    <a href="#cci"><span class="num">08</span>Coffee Contribution Index</a>
+    <a href="#limitations"><span class="num">09</span>Limitations</a>
+    <a href="#ethics"><span class="num">10</span>Ethics</a>
+    <a href="#references"><span class="num">11</span>References</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/subramya/coffee-hotspot-prediction" target="_blank">&#x2197; GitHub Repository</a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Applied Machine Learning</div>
+    <h1>Morning Brews<br>&amp; <em>Morning Rush</em></h1>
+    <p class="hero-sub">Learning coffee-driven subway hotspots in Manhattan</p>
+  </div>
+
+  <!-- 00 -->
+  <section id="abstract">
+    <h2 class="section-title"><span class="sec-num">00</span>Abstract</h2>
+    <p>We investigate morning subway &ldquo;hotspots&rdquo; in Manhattan by modeling 7&ndash;10am station-level ridership surges as a spatio-temporal representation learning problem. Restricting our analysis to Manhattan subway stations, we construct a spatial graph where nodes represent stations and edges encode geographic proximity and shared line connectivity.</p>
+    <p>We train a Spatio-Temporal Graph Attention Network (GAT) combined with a Gated Recurrent Unit (GRU) to learn latent station embeddings that capture morning demand dynamics. The model uses a multi-branch neural architecture to separately encode (1)&nbsp;historical ridership patterns, (2)&nbsp;station-level caf&eacute; and third-place density, (3)&nbsp;weather variables, and (4)&nbsp;daily urban context embeddings generated from Manhattan news headlines via Sentence-BERT.</p>
+    <p>We introduce a <strong>Coffee Contribution Index</strong> (CCI) computed through structured feature perturbation and branch-level attribution to quantify how strongly third-place density drives hotspot formation across neighborhoods. We benchmark against a sequence-only LSTM that excludes graph structure, isolating the added value of spatial message passing.</p>
+    <figure>
+      <div class="fig-placeholder">Figure 1 &mdash; Teaser map<br><br>Manhattan stations colored by hotspot frequency, caf&eacute; density contours overlaid.<br>Replace with: &lt;img src="assets/fig1_teaser.png" alt="..."&gt;</div>
+      <figcaption><strong>Fig. 1</strong> &mdash; Morning hotspot frequency across 123 Manhattan subway stations (7&ndash;10am, 95 days). Caf&eacute; density contours (400m radius) overlaid. Visual overlap motivates the core hypothesis.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 01 -->
+  <section id="intro">
+    <h2 class="section-title"><span class="sec-num">01</span>Introduction</h2>
+    <div class="todo">Write your introduction here (~300 words). Open with the sensory reality of rush hour &mdash; packed platforms, the smell of coffee, the 8:47 local &mdash; then pivot to the research gap. End with a one-sentence summary of what you found. Aim for The Economist, not a textbook.</div>
+  </section>
+
+  <!-- 02 -->
+  <section id="background">
+    <h2 class="section-title"><span class="sec-num">02</span>Background</h2>
+    <h3 class="subsec">Why This Problem Matters</h3>
+    <p>Morning rush hour is the single most stressful period for transit systems. Identifying where surges will concentrate&mdash;not just that they will happen&mdash;gives city planners and the MTA actionable intelligence for deploying staff, adjusting service frequency, or redesigning platform flow before congestion becomes a safety issue.</p>
+    <h3 class="subsec">The Third-Place Hypothesis</h3>
+    <p>The inclusion of caf&eacute; and third-place density is the intellectually interesting bet in this research. The implicit hypothesis is that subway hotspots are not purely commuter-driven; they are also shaped by <em>where people choose to linger before work</em>. If the Coffee Contribution Index confirms this, it reframes hotspots as a behavioral and urban design phenomenon rather than just a transit scheduling problem&mdash;with real implications for how cities zone commercial activity near transit and how businesses choose locations.</p>
+    <h3 class="subsec">Methodological Value</h3>
+    <p>Most ridership forecasting treats stations as independent time series. Building a spatial graph that encodes proximity and shared line connectivity lets the model propagate information between stations: a surge at 72nd St likely signals what is coming at 59th St. This mirrors how congestion actually moves through a network, making predictions structurally more honest.</p>
+    <p>The multi-branch architecture with structured feature perturbation is designed to answer <em>why</em> a hotspot forms, not just <em>whether</em> it will&mdash;a harder and more valuable question, since policymakers need causal levers, not just forecasts.</p>
+    <blockquote class="pull">"The core reason this problem matters is that it connects transit operations, urban behavioral economics, and causal machine learning in a way that could directly inform how dense cities manage their most congested daily moments."</blockquote>
+  </section>
+
+  <!-- 03 -->
+  <section id="litreview">
+    <h2 class="section-title"><span class="sec-num">03</span>Related Work</h2>
+    <h4 class="micro">Spatio-Temporal Graph Networks for Transit Demand</h4>
+    <p>The dominant model in this area encodes transit stations as graph nodes and uses graph neural networks to capture spatial dependencies alongside temporal models. Researchers have constructed graphs from physical connections between stations, passenger flow sequence similarities, and functional correlations to learn effective spatio-temporal representations <a href="#ref-lu2025">[1]</a>. The combination of GATs with recurrent architectures like GRU is well-established; one prominent approach uses dilated convolutions to extract multi-dimensional temporal dependencies, then applies GRU on metro ridership data from two Chinese cities <a href="#ref-li2025">[2]</a>.</p>
+    <p>There has also been pushback on whether graph structure always helps. Some work argues that GCN-based models fail to capture global spatial correlations effectively, motivating hybrid architectures <a href="#ref-yang2024">[3]</a>. The LSTM-only baseline in this paper directly engages with that question, isolating the contribution of spatial message passing to hotspot prediction.</p>
+    <h4 class="micro">Incorporating External Features: POI, Weather, Land Use</h4>
+    <p>Point-of-Interest (POI) data is widely used to capture the distribution of functional areas around stations; weather is a standard travel influence <a href="#ref-hu2024">[4]</a>. Work like ST-MFGCRN fuses land use, sociodemographics, and POI distribution through a sentinel attention mechanism <a href="#ref-han2024">[5]</a>. The caf&eacute; density branch in this model is a more specific and theoretically motivated version of the POI signal: rather than treating all nearby amenities as equivalent, it isolates third-place density as a behavioral driver and tests that hypothesis through structured attribution.</p>
+    <h4 class="micro">Text and Event-Based Signals</h4>
+    <p>Using natural language data in transit prediction is less common but has real precedent. Earlier approaches applied topic modeling to event descriptions with transit smart card data <a href="#ref-liang2023">[6]</a>. One study proposed a bi-directional LSTM combining tweet data with traffic and weather, specifically to handle non-recurring events that degrade accuracy in purely data-driven models <a href="#ref-essien2021">[7]</a>. Our use of Sentence-BERT on daily Manhattan news headlines extends this from event-specific triggers toward ambient urban context&mdash;an input type that remains largely unexplored.</p>
+    <h4 class="micro">Urban Hotspot Detection</h4>
+    <p>The broader hotspot detection literature mostly focuses on clustering mobility or trajectory data retrospectively <a href="#ref-yu2021">[8]</a>. Framing hotspot status as a classification target for a neural model moves the problem from retrospective identification to forward-looking prediction&mdash;the operationally useful formulation for transit management.</p>
+    <h4 class="micro">What This Work Adds</h4>
+    <p>Prior work has established strong baselines for spatio-temporal graph prediction and multi-feature fusion, but has not combined these tools in the specific context of morning surge classification in a dense North American subway network, nor attempted to disentangle the contribution of third-place commercial density from commuter and environmental signals. The Coffee Contribution Index does not have a close analog in the existing literature.</p>
+  </section>
+
+  <!-- 04 -->
+  <section id="data">
+    <h2 class="section-title"><span class="sec-num">04</span>Data</h2>
+    <p>We assemble four publicly available datasets aligned spatially at the Manhattan subway station level and temporally at daily resolution.</p>
+    <div class="stat-row">
+      <div class="stat-pill"><span class="sv">123</span><span class="sl">Stations</span></div>
+      <div class="stat-pill"><span class="sv">95</span><span class="sl">Days</span></div>
+      <div class="stat-pill"><span class="sv">9,400</span><span class="sl">Station-days</span></div>
+      <div class="stat-pill"><span class="sv">2,457</span><span class="sl">Caf&eacute; locations</span></div>
+    </div>
+    <div class="data-grid">
+      <div class="data-row"><div class="dk">Dataset</div><div class="dv" style="color:var(--crema);font-weight:600;">Role &middot; Description &middot; Source</div></div>
+      <div class="data-row"><div class="dk">MTA Hourly Ridership</div><div class="dv">Target + temporal. ~2M rows filtered to Manhattan 7&ndash;10am; produces ~9,400 station-day rows. <a href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-2022/wujg-7c2s" target="_blank">data.ny.gov</a></div></div>
+      <div class="data-row"><div class="dk">NYC Restaurant Inspections</div><div class="dv">Caf&eacute; density feature. 2,457 Manhattan coffee shop and bakery coordinates; 400m station-level density. <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" target="_blank">data.cityofnewyork.us</a></div></div>
+      <div class="data-row"><div class="dk">NOAA Daily Weather</div><div class="dv">Daily temperature and precipitation aligned by date. <a href="https://www.ncei.noaa.gov" target="_blank">ncei.noaa.gov</a></div></div>
+      <div class="data-row"><div class="dk">GDELT Project</div><div class="dv">Text embedding input. Manhattan-relevant headlines encoded via Sentence-BERT; PCA-reduced to low-dim urban context vectors. <a href="https://www.gdeltproject.org" target="_blank">gdeltproject.org</a></div></div>
+    </div>
+    <div class="todo">Add 1&ndash;2 paragraphs: how you constructed the hotspot label (top-25% threshold), how the station graph was built (edges = proximity + shared line), any data quality issues encountered.</div>
+    <figure>
+      <div class="fig-placeholder">Figure 2 &mdash; Data overview<br><br>Left: ridership distribution histogram with top-25% threshold. Right: station graph visualization.<br>Replace with: &lt;img src="assets/fig2_data.png" alt="..."&gt;</div>
+      <figcaption><strong>Fig. 2</strong> &mdash; <em>Left:</em> Distribution of 7&ndash;10am station-day ridership. Dashed line = hotspot threshold. <em>Right:</em> Spatial graph over 123 Manhattan stations. Edge weight encodes geographic proximity and shared line connectivity.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 05 -->
+  <section id="formulation">
+    <h2 class="section-title"><span class="sec-num">05</span>ML Formulation</h2>
+    <p>Let <em>G = (V, E)</em> be the station graph with |V|&nbsp;=&nbsp;123 nodes. For each station <em>v&nbsp;&isin;&nbsp;V</em> and day <em>t</em>, the model receives four input streams:</p>
+    <div class="data-grid" style="margin:24px 0;">
+      <div class="data-row"><div class="dk">x<sub>ride</sub></div><div class="dv">7-day historical ridership sequence (T &times; 1)</div></div>
+      <div class="data-row"><div class="dk">x<sub>caf&eacute;</sub></div><div class="dv">Static caf&eacute; density within 400m (scalar)</div></div>
+      <div class="data-row"><div class="dk">x<sub>wx</sub></div><div class="dv">Daily temperature and precipitation (2-dim)</div></div>
+      <div class="data-row"><div class="dk">x<sub>news</sub></div><div class="dv">Sentence-BERT headline embedding, PCA-reduced to dim <em>d</em></div></div>
+    </div>
+    <p>Output: <em>&ycirc;<sub>v,t</sub>&nbsp;&isin;&nbsp;[0,1]</em>, the predicted probability that station <em>v</em> is a hotspot on day <em>t</em>. Labels are binary (<em>y&nbsp;=&nbsp;1</em> if top-25% ridership, else 0). Objective: binary cross-entropy.</p>
+    <div class="math-block">
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+        <mi>&#x2112;</mi><mo>=</mo><mo>&#x2212;</mo>
+        <mfrac><mn>1</mn><mi>N</mi></mfrac>
+        <munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover>
+        <mo>[</mo>
+        <msub><mi>y</mi><mi>i</mi></msub><mo>log</mo><msub><mover><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub>
+        <mo>+</mo>
+        <mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>y</mi><mi>i</mi></msub><mo>)</mo>
+        <mo>log</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mo>)</mo>
+        <mo>]</mo>
+      </math>
+    </div>
+    <p>Primary evaluation: <strong>F1 score</strong> (handles class imbalance; 75% negative labels) and <strong>AUC-ROC</strong> (threshold-independent). Accuracy is not used as a primary metric&mdash;a model predicting &ldquo;never hotspot&rdquo; achieves 75% accuracy and is useless.</p>
+  </section>
+
+  <!-- 06 -->
+  <section id="model">
+    <h2 class="section-title"><span class="sec-num">06</span>Model Architecture</h2>
+    <p>The full model is a <strong>Spatio-Temporal Graph Attention Network + GRU</strong> (ST-GAT-GRU) with four input branches fused before the classification head.</p>
+    <figure>
+      <div class="fig-placeholder">Figure 3 &mdash; Architecture diagram<br><br>Four branches &rarr; encoders &rarr; fusion &rarr; GAT message passing &rarr; GRU &rarr; sigmoid output.<br>Replace with: &lt;img src="assets/fig3_arch.png" alt="..."&gt;</div>
+      <figcaption><strong>Fig. 3</strong> &mdash; ST-GAT-GRU architecture. Four feature branches are encoded separately, fused at a station embedding layer, propagated through graph attention message passing, and integrated temporally via GRU before the binary classification head.</figcaption>
+    </figure>
+    <div class="todo">Describe each component: (1) how each branch encodes its input, (2) how graph attention message passing works, (3) how the GRU integrates spatial embeddings over time, (4) the classification head. Include key hyperparameters: hidden dim, GAT heads, GRU layers, dropout.</div>
+    <h4 class="micro">Baselines</h4>
+    <p>Two LSTM baselines treat stations independently (no graph structure): <strong>Model 0</strong> uses ridership sequence only (3-day window); <strong>Model 1</strong> adds caf&eacute; density (7-day window). The LSTM&rarr;GAT comparison isolates the value of spatial message passing; the Model 0&rarr;1 comparison isolates caf&eacute; density independent of graph structure.</p>
+  </section>
+
+  <!-- 07 -->
+  <section id="experiments">
+    <h2 class="section-title"><span class="sec-num">07</span>Experiments &amp; Results</h2>
+    <p>Adding caf&eacute; density as a static station-level feature improved every metric, confirming that third-place density adds predictive signal beyond ridership history alone.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Features</th><th class="num">F1</th><th class="num">AUC</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Model 0 &mdash; LSTM</td><td>Ridership only (3-day)</td><td class="num">0.48</td><td class="num">0.71</td></tr>
+          <tr><td>Model 1 &mdash; LSTM + Caf&eacute;</td><td>Ridership + caf&eacute; density (7-day)</td><td class="num better">0.59</td><td class="num better">0.79</td></tr>
+          <tr><td>ST-GAT-GRU (full)</td><td>All branches + graph</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
+          <tr><td>ST-GAT-GRU &minus; caf&eacute;</td><td>Ablation: no caf&eacute; branch</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
+          <tr><td>ST-GAT-GRU &minus; weather</td><td>Ablation: no weather</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
+          <tr><td>ST-GAT-GRU &minus; news</td><td>Ablation: no news embeddings</td><td class="num pending">&mdash;</td><td class="num pending">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="todo">Fill in ST-GAT-GRU results. Then write results analysis (~200 words): What does the F1 gap between Model 0 and Model 1 tell us? What does LSTM&rarr;GAT tell us? Any specific stations or neighborhoods where GAT improved most?</div>
+    <figure>
+      <div class="fig-placeholder">Figure 4 &mdash; Results comparison<br><br>Grouped bar chart (F1 + AUC) across all models, or ROC curves on the same axes.<br>Replace with: &lt;img src="assets/fig4_results.png" alt="..."&gt;</div>
+      <figcaption><strong>Fig. 4</strong> &mdash; Model comparison. LSTM&rarr;GAT gap isolates value of spatial message passing. Caf&eacute; ablation isolates third-place density contribution.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 08 -->
+  <section id="cci">
+    <h2 class="section-title"><span class="sec-num">08</span>Coffee Contribution Index</h2>
+    <p>The Coffee Contribution Index (CCI) quantifies how strongly third-place density drives hotspot formation at each station. It is computed through structured feature perturbation: we zero out the caf&eacute; density branch input for each station and measure the resulting drop in predicted hotspot probability, averaged across days.</p>
+    <div class="todo">Describe the CCI computation precisely: (1) the perturbation procedure, (2) how you normalize or threshold the index, (3) any connection to formal attribution methods (SHAP, integrated gradients). Include math if applicable.</div>
+    <figure>
+      <div class="fig-placeholder">Figure 5 &mdash; Coffee Contribution Index map<br><br>Manhattan stations colored by CCI value (low = cool, high = gold/warm). Label high-CCI stations by name.<br>Replace with: &lt;img src="assets/fig5_cci.png" alt="..."&gt;</div>
+      <figcaption><strong>Fig. 5</strong> &mdash; Coffee Contribution Index across 123 Manhattan subway stations. Warmer colors indicate stations where caf&eacute; density more strongly drives hotspot formation, beyond what ridership history and weather alone explain.</figcaption>
+    </figure>
+    <div class="todo">Analyze the CCI map: Which neighborhoods show the highest caf&eacute;-driven hotspot formation? Is there a pattern (Village/SoHo vs. Midtown)? Any surprising findings?</div>
+  </section>
+
+  <!-- 09 -->
+  <section id="limitations">
+    <h2 class="section-title"><span class="sec-num">09</span>Limitations &amp; Future Work</h2>
+    <div class="todo">~200 words. Address: (1) Is 95 days enough training data? (2) Caf&eacute; density is static &mdash; appropriate? (3) Is the CCI causal or correlational? (4) What would you try with 3 more months? Suggestions: longer time range, dynamic caf&eacute; density from Yelp, multi-city generalization, online learning as MTA data streams in.</div>
+  </section>
+
+  <!-- 10 -->
+  <section id="ethics">
+    <h2 class="section-title"><span class="sec-num">10</span>Ethics</h2>
+    <div class="todo">~150 words. Address: (1) Privacy &mdash; aggregate data now, but fine-grained mobility prediction could enable surveillance if extended. (2) Equity &mdash; does the model perform equally across neighborhoods? (3) Commercial use &mdash; could the CCI accelerate gentrification by guiding businesses toward high-influence stations?</div>
+  </section>
+
+  <!-- 11 -->
+  <section id="references">
+    <h2 class="section-title"><span class="sec-num">11</span>References</h2>
+    <ol class="refs">
+      <li id="ref-lu2025">Lu, W., Zhang, Y., Vu, H. L., Xu, J., &amp; Li, P. (2025). A novel integrative prediction framework for metro passenger flow. <em>Journal of Intelligent Transportation Systems</em>, 1&ndash;26. <a href="https://doi.org/10.1080/15472450.2025.2478476" target="_blank">doi:10.1080/15472450.2025.2478476</a></li>
+      <li id="ref-li2025">Li, R., Zhao, L., Tang, J. et al. (2025). Multi-dimensional time-dependent dynamic graph neural network for metro passenger flow prediction. <em>Applied Intelligence</em>, 55, 442. <a href="https://doi.org/10.1007/s10489-025-06346-z" target="_blank">doi:10.1007/s10489-025-06346-z</a></li>
+      <li id="ref-yang2024">Yang, Q., Xu, X., Wang, Z., Yu, J., &amp; Hu, X. (2024). Are graphs and GCNs necessary for short-term metro ridership forecasting? <em>Expert Systems with Applications</em>, 254, 124431. <a href="https://doi.org/10.1016/j.eswa.2024.124431" target="_blank">doi:10.1016/j.eswa.2024.124431</a></li>
+      <li id="ref-hu2024">Hu, S., Chen, J., Zhang, W., Liu, G., &amp; Chang, X. (2024). Graph transformer embedded deep learning for short-term passenger flow prediction in urban rail transit systems. <em>Information Sciences</em>, 679, 121095. <a href="https://doi.org/10.1016/j.ins.2024.121095" target="_blank">doi:10.1016/j.ins.2024.121095</a></li>
+      <li id="ref-han2024">Han, S., An, J., Park, Y., Kim, S., Jang, K., &amp; Lee, D. (2024). <em>Multiple areal feature aware transportation demand prediction</em>. arXiv:2408.12890. <a href="https://doi.org/10.48550/arXiv.2408.12890" target="_blank">arXiv:2408.12890</a></li>
+      <li id="ref-liang2023">Liang, Y., Liu, Y., Wang, X., &amp; Zhao, Z. (2023). <em>Exploring large language models for human mobility prediction under public events</em>. arXiv:2311.17351. <a href="https://doi.org/10.48550/arXiv.2311.17351" target="_blank">arXiv:2311.17351</a></li>
+      <li id="ref-essien2021">Essien, A., Petrounias, I., Sampaio, P. et al. (2021). A deep-learning model for urban traffic flow prediction with traffic events mined from Twitter. <em>World Wide Web</em>, 24, 1345&ndash;1368. <a href="https://doi.org/10.1007/s11280-020-00800-3" target="_blank">doi:10.1007/s11280-020-00800-3</a></li>
+      <li id="ref-yu2021">Yu, Q., Chen, C., Sun, L., &amp; Zheng, X. (2021). Urban hotspot area detection using nearest-neighborhood-related quality clustering on taxi trajectory data. <em>ISPRS International Journal of Geo-Information</em>, 10(7), 473. <a href="https://doi.org/10.3390/ijgi10070473" target="_blank">doi:10.3390/ijgi10070473</a></li>
+    </ol>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <span>STAT W3106 Applied Machine Learning &middot; Spring 2026 &middot; Barnard College / Columbia University</span>
+  <a href="https://github.com/subramya/coffee-hotspot-prediction" target="_blank">&#x2197; GitHub</a>
+</footer>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav.toc a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`nav.toc a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
