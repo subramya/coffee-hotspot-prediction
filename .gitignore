@@ -20,5 +20,8 @@ outputs/
 *.gif
 *.pdf
 
+# Allow figures in assets/
+!assets/*.png
+
 # Notebook checkpoints
 .ipynb_checkpoints/

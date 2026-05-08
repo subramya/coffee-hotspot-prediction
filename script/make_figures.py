@@ -101,11 +101,13 @@ def fig1():
     nudges = {
         "611": (-0.018, 0.003),   # Times Sq
         "610": ( 0.013, 0.003),   # Grand Central
-        "164": (-0.016,-0.004),   # Penn A,C,E
         "607": ( 0.013,-0.004),   # Herald Sq
         "318": (-0.018,-0.010),   # Penn 1,2,3
     }
+    skip_ids = {"164"}  # Penn A,C,E — same hub as Penn 1,2,3, skip to avoid double label
     for _, row in top5.iterrows():
+        if str(row["station_id"]) in skip_ids:
+            continue
         nx, ny = nudges.get(str(row["station_id"]), (0.010, 0.005))
         ax.annotate(
             row["station_name"].split("(")[0].strip(),
